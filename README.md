@@ -4,7 +4,7 @@
   
   <br />
   <figure>
-    <img src="https://raw.githubusercontent.com/theo-lubert/tREST/4d40b733ea6aefc174168e7770e412a48c4654ca/packages/react-query/code.png" alt="Code" />
+    <img src="./packages/react-query/code.png" alt="Code" />
     <figcaption>
       <p align="center">
         The client above is <strong>not</strong> importing any code from the server, only its type declarations.
