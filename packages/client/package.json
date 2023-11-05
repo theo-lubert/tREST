@@ -1,6 +1,6 @@
 {
   "name": "@trestjs/client",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Client - End-to-end typesafe REST APIs, the tRPC way",
   "author": "Théo Lubert",
   "license": "ISC",
