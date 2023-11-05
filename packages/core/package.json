@@ -6,6 +6,16 @@
   "license": "ISC",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/theo-lubert/tREST/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theo-lubert/tREST.git"
+  },
   "scripts": {
     "version-update": "npm version --no-git-tag-version ${RELEASE_TYPE:-patch}",
     "prepublish": "npm run version-update && npm run clean && npm run build",
