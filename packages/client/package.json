@@ -1,0 +1,27 @@
+{
+  "name": "@trestjs/client",
+  "version": "0.0.3",
+  "description": "Client - End-to-end typesafe REST APIs, the tRPC way",
+  "author": "Théo Lubert",
+  "license": "ISC",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "scripts": {
+    "version-update": "npm version --no-git-tag-version ${RELEASE_TYPE:-patch}",
+    "prepublish": "npm run version-update && npm run clean && npm run build",
+    "clean": "rm -rf ./dist ./build ./tsconfig.tsbuildinfo",
+    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
+    "test": "vitest run src/"
+  },
+  "dependencies": {
+    "@trestjs/core": "workspace:*",
+    "qs": "^6.11.2"
+  },
+  "devDependencies": {
+    "@types/qs": "^6.9.9",
+    "express": "^4.18.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

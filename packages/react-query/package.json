@@ -1,0 +1,29 @@
+{
+  "name": "@trestjs/react-query",
+  "version": "0.0.5",
+  "description": "React Query - End-to-end typesafe REST APIs, the tRPC way",
+  "author": "Théo Lubert",
+  "license": "ISC",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "version-update": "npm version --no-git-tag-version ${RELEASE_TYPE:-patch}",
+    "prepublish": "npm run version-update && npm run clean && npm run build",
+    "clean": "rm -rf ./dist ./build ./tsconfig.tsbuildinfo",
+    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json",
+    "test": "vitest run src/"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.7.0"
+  },
+  "dependencies": {
+    "@trestjs/client": "workspace:*",
+    "@trestjs/core": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
