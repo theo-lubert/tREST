@@ -1,6 +1,6 @@
 {
   "name": "@trestjs/react-query",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "React Query - End-to-end typesafe REST APIs, the tRPC way",
   "author": "Théo Lubert",
   "license": "ISC",
@@ -29,6 +29,10 @@
   "dependencies": {
     "@trestjs/client": "workspace:*",
     "@trestjs/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@trestjs/nextjs": "workspace:*",
+    "zod": "^3.22.4"
   },
   "publishConfig": {
     "access": "public"
