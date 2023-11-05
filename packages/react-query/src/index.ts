@@ -53,8 +53,8 @@ export function useRouteQuery<
     queryKey?: string[]
 ) {
     return (
-        input: InputObject<TRouteParams, TSearchParams, TBody>,
-        options?: UseTRESTQueryOptions<TRouteResponse>
+        input: InputObject<TRouteParams, TSearchParams, TBody>
+        // options?: UseTRESTQueryOptions<TRouteResponse>
     ) => {
         const route = fetchRoute<
             TRoute,
@@ -68,7 +68,7 @@ export function useRouteQuery<
         return useQuery<TRouteResponse>({
             queryKey: queryKeys,
             queryFn: () => route(input),
-            ...options,
+            // ...options,
         })
     }
 }
