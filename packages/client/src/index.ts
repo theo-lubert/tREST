@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import qs from 'qs'
 import type {
     InferBody,
@@ -5,14 +6,17 @@ import type {
     InferRouteParams,
     InferSearchParams,
     InputObject,
-    ReturnFunction,
+    HandlerFunction,
 } from '@trestjs/core'
 
 export function fetchRoute<
     TRoute extends {
-        _type?: // | ReturnFunction<TRouteParams, TSearchParams, TBody, TRouteResponse>
-        // | (() => TRouteResponse)
-        ReturnFunction<TRouteParams, TSearchParams, TBody, TRouteResponse>
+        _type?: HandlerFunction<
+            TRouteParams,
+            TSearchParams,
+            TBody,
+            TRouteResponse
+        >
     },
     T = TRoute extends {
         _type?: infer T
@@ -22,9 +26,9 @@ export function fetchRoute<
     TRouteParams = InferRouteParams<T>,
     TSearchParams = InferSearchParams<T>,
     TBody = InferBody<T>,
-    TRouteResponse = InferResponse<T, TRouteParams, TSearchParams, TBody>,
+    TRouteResponse = InferResponse<T>,
 >(method: string, routePath: string, fetchOptions?: RequestInit) {
-    return async (input: InputObject<TRouteParams, TSearchParams, TBody>) => {
+    return (async (input?: InputObject<TRouteParams, TSearchParams, TBody>) => {
         const options = {
             method,
             ...fetchOptions,
@@ -33,15 +37,15 @@ export function fetchRoute<
                 ...fetchOptions?.headers,
             },
         }
-        if ('body' in input && input.body) {
+        if (input && 'body' in input && input.body) {
             options.body = JSON.stringify(input.body)
         }
         let params: string | undefined
-        if ('searchParams' in input && input.searchParams) {
+        if (input && 'searchParams' in input && input.searchParams) {
             params = `?${qs.stringify(input.searchParams)}`
         }
 
-        if ('routeParams' in input && input.routeParams) {
+        if (input && 'routeParams' in input && input.routeParams) {
             const routeParams = input.routeParams as Record<string, unknown>
             for (const key of Object.keys(routeParams)) {
                 routePath = routePath.replace(
@@ -52,5 +56,5 @@ export function fetchRoute<
         }
         const res = await fetch(`${routePath}${params || ''}`, options)
         return (await res.json()) as TRouteResponse
-    }
+    }) as HandlerFunction<TRouteParams, TSearchParams, TBody, TRouteResponse>
 }

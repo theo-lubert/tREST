@@ -1,7 +1,7 @@
 import { fetchRoute } from '@trestjs/client'
 import type {
     InputObject,
-    ReturnFunction,
+    HandlerFunction,
     InferBody,
     InferResponse,
     InferRouteParams,
@@ -10,7 +10,7 @@ import type {
 } from '@trestjs/core'
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
-interface UseTRESTQueryOptions<T> extends UseQueryOptions<T> {}
+export interface UseTRESTQueryOptions<T> extends UseQueryOptions<T> {}
 
 export function queryKeyFrom<TRouteParams, TSearchParams, TBody>(
     url: string,
@@ -33,9 +33,12 @@ export function queryKeyFrom<TRouteParams, TSearchParams, TBody>(
 
 export function useRouteQuery<
     TRoute extends {
-        _type?: // | ReturnFunction<TRouteParams, TSearchParams, TBody, TRouteResponse>
-        // | (() => TRouteResponse)
-        ReturnFunction<TRouteParams, TSearchParams, TBody, TRouteResponse>
+        _type?: HandlerFunction<
+            TRouteParams,
+            TSearchParams,
+            TBody,
+            TRouteResponse
+        >
     },
     T = TRoute extends {
         _type?: infer T
@@ -45,7 +48,7 @@ export function useRouteQuery<
     TRouteParams = InferRouteParams<T>,
     TSearchParams = InferSearchParams<T>,
     TBody = InferBody<T>,
-    TRouteResponse = InferResponse<T, TRouteParams, TSearchParams, TBody>,
+    TRouteResponse = InferResponse<T>,
 >(
     method: HttpMethod,
     url: string,

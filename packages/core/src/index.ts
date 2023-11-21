@@ -1,15 +1,16 @@
 // import { z } from 'zod'
 import type {
-    ReturnFunction,
+    HandlerFunction,
     RemoveNever,
     InferRouteType,
     InferRouteFunc,
     InferMethod,
-    TypedRouterFormat,
+    UnknownTypedRouterFormat,
 } from './types'
 export type * from './types'
 import { input } from './input'
-import { route as createRoute } from './route'
+import { coreRoute } from './route'
+export { routeWithHandler } from './route'
 
 export function router<
     T extends {
@@ -21,13 +22,13 @@ export function router<
         PATCH?: TPATCH
         DELETE?: TDELETE
     },
-    TOPTIONS extends TypedRouterFormat = InferMethod<T, 'OPTIONS'>,
-    THEAD extends TypedRouterFormat = InferMethod<T, 'HEAD'>,
-    TGET extends TypedRouterFormat = InferMethod<T, 'GET'>,
-    TPUT extends TypedRouterFormat = InferMethod<T, 'PUT'>,
-    TPOST extends TypedRouterFormat = InferMethod<T, 'POST'>,
-    TPATCH extends TypedRouterFormat = InferMethod<T, 'PATCH'>,
-    TDELETE extends TypedRouterFormat = InferMethod<T, 'DELETE'>,
+    TOPTIONS extends UnknownTypedRouterFormat = InferMethod<T, 'OPTIONS'>,
+    THEAD extends UnknownTypedRouterFormat = InferMethod<T, 'HEAD'>,
+    TGET extends UnknownTypedRouterFormat = InferMethod<T, 'GET'>,
+    TPUT extends UnknownTypedRouterFormat = InferMethod<T, 'PUT'>,
+    TPOST extends UnknownTypedRouterFormat = InferMethod<T, 'POST'>,
+    TPATCH extends UnknownTypedRouterFormat = InferMethod<T, 'PATCH'>,
+    TDELETE extends UnknownTypedRouterFormat = InferMethod<T, 'DELETE'>,
 >(router: {
     OPTIONS?: TOPTIONS
     HEAD?: THEAD
@@ -70,13 +71,13 @@ export function router<
 export const route = {
     input,
     func: <TRouteResponse>(
-        handler: ReturnFunction<never, never, never, TRouteResponse>
+        handler: HandlerFunction<never, never, never, TRouteResponse>
     ) =>
-        createRoute<TRouteResponse, never, never, never>({
+        coreRoute<never, never, never, TRouteResponse>({
             input: {},
             func: handler,
         }),
 }
 
-const _default = { ...route, router }
+const _default = { ...route, route, router }
 export default _default

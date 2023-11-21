@@ -1,8 +1,10 @@
-import { test, expect } from 'vitest'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { test } from 'vitest'
 import { route } from '@trestjs/core'
 import { fetchRoute } from '.'
 import { z } from 'zod'
 import express from 'express'
+import { expectTypeOf } from '../../../helpers/test'
 
 function mockServer(port: number) {
     const app = express()
@@ -38,13 +40,20 @@ test('Fetch client should run properly', async () => {
     const GET_routeResponse = await fetchRoute<typeof GET>(
         'GET',
         `http://localhost:${port}/api`
-    )({
-        // TODO: Should not be needed, and should fail
-        routeParams: undefined,
-        searchParams: undefined,
-        body: undefined,
-    })
+    )()
     console.log('GET_routeResponse:', GET_routeResponse)
+
+    expectTypeOf(fetchRoute<typeof GET>('GET', `http://localhost:${port}/api`))
+        .toEqualTypeOf<
+        () => Promise<{
+            readonly id: '0123456789'
+            readonly test: true
+        }>
+    >
+    expectTypeOf(GET_routeResponse).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: true
+    }>
 
     const PUT = route
         .input({
@@ -64,6 +73,18 @@ test('Fetch client should run properly', async () => {
     )({ searchParams: { test: true } })
     console.log('PUT_routeResponse:', PUT_routeResponse)
 
+    expectTypeOf(fetchRoute<typeof PUT>('PUT', `http://localhost:${port}/api`))
+        .toEqualTypeOf<
+        (input: { searchParams: { test: boolean } }) => Promise<{
+            readonly id: '0123456789'
+            readonly test: boolean
+        }>
+    >
+    expectTypeOf(PUT_routeResponse).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: boolean
+    }>
+
     const POST = route
         .input({
             body: z.object({
@@ -81,6 +102,18 @@ test('Fetch client should run properly', async () => {
         `http://localhost:${port}/api`
     )({ body: { test: true } })
     console.log('POST_routeResponse:', POST_routeResponse)
+
+    expectTypeOf(fetchRoute<typeof POST>('PUT', `http://localhost:${port}/api`))
+        .toEqualTypeOf<
+        (input: { body: { test: boolean } }) => Promise<{
+            readonly id: '0123456789'
+            readonly test: boolean
+        }>
+    >
+    expectTypeOf(POST_routeResponse).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: boolean
+    }>
 
     await app.close()
 })

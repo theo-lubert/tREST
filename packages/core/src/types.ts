@@ -1,69 +1,66 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from 'zod'
 
+// Utils
+
 type FilteredKeys<T> = {
     [K in keyof T]: T[K] extends never ? never : K
 }[keyof T]
+
 export type RemoveNever<T> = {
     [K in FilteredKeys<T>]: T[K]
 }
 
-// export type Cleanup<T> = T extends {}
-//     ? {
-//           [P in keyof T]: T[P]
-//       }
-//     : T
+// export type Pretty<T> = {
+//     [K in keyof T]: Pretty<T[K]>
+// }
 
-// export type Unpack<T> = {
-//     [K in keyof T]: T[K] extends object ? Unpack<T[K]> : T[K]
-// }
-// export type UnpackAlt<T> = {
-//     [K in keyof T]: UnpackAlt<T[K]>
-// }
+export type HttpMethod =
+    | 'OPTIONS'
+    | 'HEAD'
+    | 'GET'
+    | 'POST'
+    | 'PUT'
+    | 'PATCH'
+    | 'DELETE'
+
+// Input
 
 export type InputSchema = z.ZodSchema
-// export type OptionalInputSchema = InputSchema | undefined
 export type InputType<T> = T extends z.ZodSchema ? z.infer<T> : never
-
 export type InputObject<TRouteParams, TSearchParams, TBody> = RemoveNever<{
     routeParams: TRouteParams
     searchParams: TSearchParams
     body: TBody
 }>
 
-export type InferRouteParams<TRouter> = TRouter extends ReturnFunction<
-    infer InferredType,
-    unknown,
-    unknown,
-    unknown
->
+export type InferRouteParams<THandler> = THandler extends (input: {
+    routeParams: infer InferredType
+}) => unknown
+    ? Parameters<THandler>[0] extends undefined
+        ? never
+        : InferredType
+    : never
+export type InferSearchParams<THandler> = THandler extends (input: {
+    searchParams: infer InferredType
+}) => unknown
+    ? Parameters<THandler>[0] extends undefined
+        ? never
+        : InferredType
+    : never
+
+export type InferBody<THandler> = THandler extends (input: {
+    body: infer InferredType
+}) => unknown
+    ? Parameters<THandler>[0] extends undefined
+        ? never
+        : InferredType
+    : never
+export type InferResponse<THandler> = THandler extends (
+    ...args: any[]
+) => Promise<infer InferredType>
     ? InferredType
     : never
-export type InferSearchParams<TRouter> = TRouter extends ReturnFunction<
-    unknown,
-    infer InferredType,
-    unknown,
-    unknown
->
-    ? InferredType
-    : never
-export type InferBody<TRouter> = TRouter extends ReturnFunction<
-    unknown,
-    unknown,
-    infer InferredType,
-    unknown
->
-    ? InferredType
-    : never
-export type InferResponse<TRouter, TRouteParams, TSearchParams, TBody> =
-    TRouter extends ReturnFunction<
-        TRouteParams,
-        TSearchParams,
-        TBody,
-        infer InferredType
-    >
-        ? InferredType
-        : never
 
 export type InferRouteType<T> = T extends { _type?: infer R } ? R : never
 export type InferRouteFunc<T> = T extends { route: infer R } ? R : never
@@ -75,66 +72,74 @@ export type InferMethod<T, M extends keyof T> = T extends {
         : never
     : never
 
-export type HttpMethod =
-    | 'OPTIONS'
-    | 'HEAD'
-    | 'GET'
-    | 'POST'
-    | 'PUT'
-    | 'PATCH'
-    | 'DELETE'
-
-export type RouteHandler<
-    TRouteResponse,
+export type RouteHandlerOptions<
     TRouteParamsSchema extends InputSchema | undefined,
     TSearchParamsSchema extends InputSchema | undefined,
     TBodySchema extends InputSchema | undefined,
+    TRouteResponse,
+    THandler extends GenericHandlerFunction<
+        InputType<TRouteParamsSchema>,
+        InputType<TSearchParamsSchema>,
+        InputType<TBodySchema>,
+        unknown
+    >,
 > = {
+    _output?: TRouteResponse
     input: {
         routeParams?: TRouteParamsSchema
         searchParams?: TSearchParamsSchema
         body?: TBodySchema
     }
-    func: ReturnFunction<
-        InputType<TRouteParamsSchema>,
-        InputType<TSearchParamsSchema>,
-        InputType<TBodySchema>,
-        TRouteResponse
-    >
+    func: THandler
 }
 
-export type ReturnFunctionWithInput<
+export type GenericHandlerFunction<
     TRouteParamsType,
     TSearchParamsType,
     TBodyType,
     TRouteResponse,
-> = (
-    input: InputObject<TRouteParamsType, TSearchParamsType, TBodyType>
-) => Promise<TRouteResponse>
-export type ReturnFunction<
+> = TRouteParamsType | TSearchParamsType | TBodyType extends never
+    ? (...args: any[]) => Promise<TRouteResponse>
+    : (
+          input: InputObject<TRouteParamsType, TSearchParamsType, TBodyType>,
+          ...args: any[]
+      ) => Promise<TRouteResponse>
+
+export type HandlerFunction<
     TRouteParamsType,
     TSearchParamsType,
     TBodyType,
     TRouteResponse,
 > = TRouteParamsType | TSearchParamsType | TBodyType extends never
     ? () => Promise<TRouteResponse>
-    : ReturnFunctionWithInput<
-          TRouteParamsType,
-          TSearchParamsType,
-          TBodyType,
-          TRouteResponse
-      >
+    : (
+          input: InputObject<TRouteParamsType, TSearchParamsType, TBodyType>
+      ) => Promise<TRouteResponse>
 
-export type TypedRouterFormat<T = unknown, R = unknown> = {
+export type TypedRouterFormat<T, R> = {
     _type?: T
     route: R
 }
+export type UnknownTypedRouterFormat = TypedRouterFormat<unknown, unknown>
 
 export type TypedRouter<
     T,
-    TRouteParamsSchema extends InputSchema | undefined = T extends RouteHandler<
-        any,
+    THandler extends (...args: any[]) => any = T extends {
+        func: infer InferredType extends (...args: any[]) => any
+    }
+        ? InferredType
+        : never,
+    TRouteResponse = T extends {
+        _output?: infer InferredType
+    }
+        ? InferredType
+        : never,
+    TRouteParamsSchema extends
+        | InputSchema
+        | undefined = T extends RouteHandlerOptions<
         infer InferredType,
+        any,
+        any,
         any,
         any
     >
@@ -142,38 +147,32 @@ export type TypedRouter<
         : never,
     TSearchParamsSchema extends
         | InputSchema
-        | undefined = T extends RouteHandler<any, any, infer InferredType, any>
-        ? InferredType
-        : never,
-    TBodySchema extends InputSchema | undefined = T extends RouteHandler<
+        | undefined = T extends RouteHandlerOptions<
+        any,
+        infer InferredType,
         any,
         any,
-        any,
-        infer InferredType
+        any
     >
         ? InferredType
         : never,
-    TRouteResponse = T extends RouteHandler<
+    TBodySchema extends InputSchema | undefined = T extends RouteHandlerOptions<
+        any,
+        any,
         infer InferredType,
-        TRouteParamsSchema,
-        TSearchParamsSchema,
-        TBodySchema
+        any,
+        any
     >
         ? InferredType
         : never,
 > = TypedRouterFormat<
-    ReturnFunction<
+    HandlerFunction<
         InputType<TRouteParamsSchema>,
         InputType<TSearchParamsSchema>,
         InputType<TBodySchema>,
         TRouteResponse
     >,
-    ReturnFunction<
-        InputType<TRouteParamsSchema>,
-        InputType<TSearchParamsSchema>,
-        InputType<TBodySchema>,
-        TRouteResponse
-    >
+    THandler
 >
 
 export type OptionalTypedRouter<T> = T extends undefined

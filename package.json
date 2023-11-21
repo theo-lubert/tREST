@@ -12,5 +12,11 @@
     "tsx": "^3.14.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"
+  },
+  "scripts": {
+    "clean": "pnpm --parallel -r run clean",
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "rebuild": "pnpm run clean && pnpm --filter core run build && pnpm -r i && pnpm build && pnpm run test"
   }
 }

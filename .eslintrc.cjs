@@ -4,6 +4,7 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint'],
     root: true,
+    ignorePatterns: ['**/dist'],
     rules: {
         'no-unused-vars': 'off',
         '@typescript-eslint/no-unused-vars': [

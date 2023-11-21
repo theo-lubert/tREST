@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
     InputObject,
     InputSchema,
     InputType,
-    ReturnFunction,
+    HandlerFunction,
 } from './types'
-import { route } from './route'
+import { coreRoute } from './route'
 
-export function input<
+export function inputGeneric<
     TRouteParamsSchema extends InputSchema = never,
     TSearchParamsSchema extends InputSchema = never,
     TBodySchema extends InputSchema = never,
@@ -17,19 +18,58 @@ export function input<
 }) {
     return {
         func: <TRouteResponse>(
-            handler: ReturnFunction<
+            handler: HandlerFunction<
                 InputType<TRouteParamsSchema>,
                 InputType<TSearchParamsSchema>,
                 InputType<TBodySchema>,
                 TRouteResponse
             >
         ) =>
-            route({
+            coreRoute({
                 input,
                 func: handler,
             }),
     }
 }
+
+export function input<
+    TRouteParamsSchema extends InputSchema = never,
+    TSearchParamsSchema extends InputSchema = never,
+    TBodySchema extends InputSchema = never,
+>(input: {
+    routeParams?: TRouteParamsSchema
+    searchParams?: TSearchParamsSchema
+    body?: TBodySchema
+}) {
+    return inputGeneric<TRouteParamsSchema, TSearchParamsSchema, TBodySchema>(
+        input
+    )
+}
+
+// export function input<
+//     TRouteParamsSchema extends InputSchema = never,
+//     TSearchParamsSchema extends InputSchema = never,
+//     TBodySchema extends InputSchema = never,
+// >(input: {
+//     routeParams?: TRouteParamsSchema
+//     searchParams?: TSearchParamsSchema
+//     body?: TBodySchema
+// }) {
+//     return {
+//         func: <TRouteResponse>(
+//             handler: HandlerFunction<
+//                 InputType<TRouteParamsSchema>,
+//                 InputType<TSearchParamsSchema>,
+//                 InputType<TBodySchema>,
+//                 TRouteResponse
+//             >
+//         ) =>
+//             createRoute({
+//                 input,
+//                 func: handler,
+//             }),
+//     }
+// }
 
 export async function inputValidation<
     TRouteParamsSchema extends InputSchema,

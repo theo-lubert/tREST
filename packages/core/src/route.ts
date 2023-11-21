@@ -1,40 +1,70 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
     InputSchema,
     InputType,
-    RouteHandler,
-    ReturnFunction,
+    RouteHandlerOptions,
     TypedRouter,
+    InputObject,
+    HandlerFunction,
 } from './types'
 export type * from './types'
 import { inputValidation } from './input'
 
-export function route<
+export type AnyPromisedFunction = (...args: any[]) => Promise<any>
+
+export function routeWithHandler<
+    TRouteParamsSchema extends InputSchema,
+    TSearchParamsSchema extends InputSchema,
+    TBodySchema extends InputSchema,
     TRouteResponse,
-    TRouteParamsSchema extends InputSchema | undefined,
-    TSearchParamsSchema extends InputSchema | undefined,
-    TBodySchema extends InputSchema | undefined,
+    THandler extends (...args: any[]) => Promise<unknown>,
+    TRouteFunc extends (...args: any[]) => Promise<any>,
 >(
-    options: RouteHandler<
-        TRouteResponse,
+    options: RouteHandlerOptions<
         TRouteParamsSchema,
         TSearchParamsSchema,
-        TBodySchema
-    >
-): TypedRouter<typeof options> {
+        TBodySchema,
+        TRouteResponse,
+        THandler
+    >,
+    handler: TRouteFunc
+): TypedRouter<typeof options, TRouteFunc> {
     return {
-        route: (async (input: {
-            routeParams?: InputType<TRouteParamsSchema>
-            searchParams?: InputType<TSearchParamsSchema>
-            body?: InputType<TBodySchema>
-        }) => {
-            const validatedInput = await inputValidation(options.input, input)
-            console.log(`[tREST Core] validatedInput:`, validatedInput)
-            return options.func(validatedInput)
-        }) as ReturnFunction<
+        route: handler,
+    }
+}
+
+export function coreRoute<
+    TRouteParamsSchema extends InputSchema,
+    TSearchParamsSchema extends InputSchema,
+    TBodySchema extends InputSchema,
+    TRouteResponse,
+>(
+    options: RouteHandlerOptions<
+        TRouteParamsSchema,
+        TSearchParamsSchema,
+        TBodySchema,
+        TRouteResponse,
+        HandlerFunction<
             InputType<TRouteParamsSchema>,
             InputType<TSearchParamsSchema>,
             InputType<TBodySchema>,
             TRouteResponse
-        >,
-    }
+        >
+    >
+): TypedRouter<typeof options> {
+    return routeWithHandler(
+        options,
+        async (
+            input: InputObject<
+                InputType<TRouteParamsSchema>,
+                InputType<TSearchParamsSchema>,
+                InputType<TBodySchema>
+            >
+        ) => {
+            const validatedInput = await inputValidation(options.input, input)
+            console.log(`[tREST Core] validatedInput:`, validatedInput)
+            return await options.func(validatedInput)
+        }
+    ) as TypedRouter<typeof options>
 }

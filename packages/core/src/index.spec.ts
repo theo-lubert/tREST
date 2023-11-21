@@ -1,6 +1,8 @@
-import { test, expectTypeOf } from 'vitest'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { test } from 'vitest'
 import { z } from 'zod'
 import tREST from '.'
+import { expectTypeOf } from '../../../helpers/test'
 
 test('GET._type defined properly', async () => {
     const GET = tREST.func(async () => {
@@ -10,15 +12,15 @@ test('GET._type defined properly', async () => {
         } as const
     })
 
-    expectTypeOf(GET._type).toMatchTypeOf<
+    expectTypeOf(GET._type!).toEqualTypeOf<
         () => Promise<{
-            id: '0123456789'
-            test: true
+            readonly id: '0123456789'
+            readonly test: true
         }>
     >
-    expectTypeOf(await GET.route()).toMatchTypeOf<{
-        id: '0123456789'
-        test: true
+    expectTypeOf(await GET.route()).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: true
     }>
 })
 
@@ -39,8 +41,8 @@ test('PATCH._type defined properly', async () => {
             }
         })
 
-    expectTypeOf(PATCH._type).toMatchTypeOf<
-        (validatedData: {
+    expectTypeOf(PATCH._type!).toEqualTypeOf<
+        (input: {
             routeParams: { id: number }
             body: { test: boolean }
         }) => Promise<{
@@ -53,7 +55,7 @@ test('PATCH._type defined properly', async () => {
             routeParams: { id: 42 },
             body: { test: true },
         })
-    ).toMatchTypeOf<{
+    ).toEqualTypeOf<{
         id: number
         test: boolean
     }>
@@ -74,19 +76,19 @@ test('PUT._type defined properly', async () => {
             } as const
         })
 
-    expectTypeOf(PUT._type).toMatchTypeOf<
-        (validatedData: { searchParams: { test: boolean } }) => Promise<{
-            id: '0123456789'
-            test: boolean
+    expectTypeOf(PUT._type!).toEqualTypeOf<
+        (input: { searchParams: { test: boolean } }) => Promise<{
+            readonly id: '0123456789'
+            readonly test: boolean
         }>
     >
     expectTypeOf(
         await PUT.route({
             searchParams: { test: true },
         })
-    ).toMatchTypeOf<{
-        id: '0123456789'
-        test: boolean
+    ).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: boolean
     }>
 })
 
@@ -104,15 +106,15 @@ test('POST._type defined properly', async () => {
             } as const
         })
 
-    expectTypeOf(POST._type).toMatchTypeOf<
+    expectTypeOf(POST._type!).toEqualTypeOf<
         (validatedData: { body: { test: boolean } }) => Promise<{
-            id: '0123456789'
-            test: boolean
+            readonly id: '0123456789'
+            readonly test: boolean
         }>
     >
-    expectTypeOf(await POST.route({ body: { test: true } })).toMatchTypeOf<{
-        id: '0123456789'
-        test: boolean
+    expectTypeOf(await POST.route({ body: { test: true } })).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: boolean
     }>
 })
 
@@ -166,19 +168,19 @@ test('router defined properly', async () => {
             }),
     })
 
-    expectTypeOf(router._type?.GET).toMatchTypeOf<
+    expectTypeOf(router._type?.GET).toEqualTypeOf<
         | undefined
         | (() => Promise<{
-              id: '0123456789'
-              test: true
+              readonly id: '0123456789'
+              readonly test: true
           }>)
     >()
-    expectTypeOf(await router.GET()).toMatchTypeOf<{
-        id: '0123456789'
-        test: true
+    expectTypeOf(await router.GET()).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: true
     }>()
 
-    expectTypeOf(router._type?.PATCH).toMatchTypeOf<
+    expectTypeOf(router._type?.PATCH).toEqualTypeOf<
         | undefined
         | ((validatedData: {
               routeParams: { id: number }
@@ -193,36 +195,36 @@ test('router defined properly', async () => {
             routeParams: { id: 42 },
             body: { test: true },
         })
-    ).toMatchTypeOf<{
+    ).toEqualTypeOf<{
         id: number
         test: boolean
     }>
 
-    expectTypeOf(router._type?.PUT).toMatchTypeOf<
+    expectTypeOf(router._type?.PUT).toEqualTypeOf<
         | undefined
         | ((validatedData: { searchParams: { test: boolean } }) => Promise<{
-              id: '0123456789'
-              test: boolean
+              readonly id: '0123456789'
+              readonly test: boolean
           }>)
     >
     expectTypeOf(
         await router.PUT({
             searchParams: { test: true },
         })
-    ).toMatchTypeOf<{
-        id: '0123456789'
-        test: boolean
+    ).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: boolean
     }>
 
-    expectTypeOf(router._type?.POST).toMatchTypeOf<
+    expectTypeOf(router._type?.POST).toEqualTypeOf<
         | undefined
         | ((validatedData: { body: { test: boolean } }) => Promise<{
-              id: '0123456789'
-              test: boolean
+              readonly id: '0123456789'
+              readonly test: boolean
           }>)
     >
-    expectTypeOf(await router.POST({ body: { test: true } })).toMatchTypeOf<{
-        id: '0123456789'
-        test: boolean
+    expectTypeOf(await router.POST({ body: { test: true } })).toEqualTypeOf<{
+        readonly id: '0123456789'
+        readonly test: boolean
     }>
 })
